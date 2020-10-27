@@ -11,10 +11,12 @@ double wplata = 500; // Miesięczna wpłata
 
 double wynik = wplata; // Wynik z oblicze
 double odsetki = 0;
+double suma_odsetek = 0;
+double wplacone = 0;
 
 bool dynamic_values = false;
 int count_from = 0; // Miesiac od ktorego zmiany maja byc wprowadzone
-double new_percent = procent;
+double new_procent = procent;
 int new_kapita = kapita;
 double new_wplata = wplata;
 
@@ -55,7 +57,7 @@ void load_config(){ // Wczytanie danych wejściowych z pliku
         kapita = stoi(lines[2]);
         wplata = stod(lines[3]);
 
-        new_percent = procent;
+        new_procent = procent;
         new_kapita = kapita;
         new_wplata = wplata;
     }
@@ -76,12 +78,69 @@ void save_data(){ // Zapisanie wyniku do pliku
     int a = 0;
 }
 
-void choices(){ // Wybieranie trybu wprowadzania danych
-    // system("clear");
-    string mode;
-    string dynamic;
 
-    cout << "\nWybierz tryb wprowadzania danych: \n";
+void calculate(){ // Właściwe obliczenia
+    float odsetki_nienaliczone = 0;
+    int loop = kapita-1;
+    for (int i = 0; i < miesiace; i++) {
+
+        if(dynamic_values == true && count_from == i){ // Wprowadzenie dynamicznych danych
+            procent = new_procent;
+            mies_proc = procent/12;
+            kapita = new_kapita;
+            wplata = new_wplata;
+        }
+        
+        odsetki = wynik * mies_proc / 100;
+        odsetki_nienaliczone += odsetki;
+
+        wplacone += wplata;
+        suma_odsetek += odsetki;
+
+        if(loop == 0){ // Naliczanie odsetek
+            wynik += odsetki_nienaliczone;
+            odsetki_nienaliczone = 0;
+            loop = kapita;
+        }
+
+        // cout << "loop" << loop << endl;
+        // cout << "miesiac" << i << endl;
+        // cout << "odsetki: " << odsetki << endl;
+        // cout << "proc" << procent << endl;
+        // cout << "wynik: " << wynik << endl;
+        // cout << "\n";
+        wynik += wplata; // TODO add save to file
+        loop--;
+    }
+
+    return;
+}
+
+void draw_data(){ // Wypisz wprowadzone dane
+    cout << "\nIlość miesięcy oszczędzania: " << miesiace << "\n";
+    cout << "Oprocentowanie środków (w skali rocznej): " << procent << "\n";
+    cout << "Częstotliwość kapitalizacji (co ile miesięcy): " << kapita << "\n";
+    cout << "Miesięczna wplata: " << wplata << "\n";
+
+    if(dynamic_values == true){
+        cout << "\nZmienne wartości:\n";
+        cout << "Zmienia sie od miesiąca: " << count_from << endl;
+        if(new_procent != procent){
+            cout << "Oprocentowanie: " << new_procent << endl;
+        }
+        if(new_kapita != kapita){
+            cout << "Kapitalizacja: " << new_kapita << endl;
+        }
+        if(new_wplata != wplata){
+            cout << "Wplata: " << new_wplata << endl;
+        }
+    }
+    return;
+}
+
+void menu_load_mode(){ // Wybierz tryb ładowania danych
+    string mode;
+    cout << "Wybierz tryb wprowadzania danych: \n";
     cout << "1. Zaladuj z pliku\n";
     cout << "2. Wprowadz recznie\n";
     cin >> mode;
@@ -96,11 +155,16 @@ void choices(){ // Wybieranie trybu wprowadzania danych
     else
     {
         cout << "Wprowadz poprawną wartosc\n";
-        choices();
+        menu_load_mode();
     }
+    return;
+}
+
+void menu_dynamic_values(){ // Wybierz dynamiczne dane
+    string dynamic;
 
     cout << "\nZmienne wartosci?\n";
-    cout << "t/n \n";
+    cout << "t - Tak\nn - Nie \n";
     cin >> dynamic; //TODO add podatek
 
     if(dynamic == "t"){
@@ -118,7 +182,7 @@ void choices(){ // Wybieranie trybu wprowadzania danych
         cout << "Podaj nowa wartosc\n";
         if(wyb == "1")
         {
-            cin >> new_percent; // TODO variable conversion
+            cin >> new_procent; // TODO variable conversion
         }
         else if (wyb == "2")
         {
@@ -131,75 +195,41 @@ void choices(){ // Wybieranie trybu wprowadzania danych
         else 
         {
             cout << "Podaj poprawną wartość\n";
-            choices(); // TODO fix
+            menu_dynamic_values();
         }
 
         cout << "Od ktorego miesiaca wartosc ma sie zmienic?\n";
         cin >> month;
         count_from = stoi(month);
     }
-    else
-    {
-        return;
-    }
-}
-
-void calculate(){ // Właściwe obliczenia
-    float odsetki_nienaliczone = 0;
-    int loop = kapita-1;
-    for (int i = 0; i < miesiace; i++) {
-
-        if(dynamic_values == true || count_from == i){
-            procent = new_percent;
-            mies_proc = procent/12;
-            kapita = new_kapita;
-            wplata = new_wplata;
-        }
-        
-        odsetki = wynik * mies_proc / 100;
-        odsetki_nienaliczone += odsetki;
-
-        if(loop == 0){
-            wynik += odsetki_nienaliczone;
-            odsetki_nienaliczone = 0;
-            loop = kapita;
-        }
-
-        cout << "loop" << loop << endl;
-        cout << "miesiac" << i << endl;
-        cout << "odsetki: " << odsetki << endl;
-        cout << "proc" << procent << endl;
-        cout << "wynik: " << wynik << endl;
-        cout << "\n";
-        wynik += wplata;
-        loop--;
-    }
-
     return;
+
 }
 
-void draw_data(){ // Wypisz wprowadzone dane
-    // system("clear");
-    cout << "\nIlość miesięcy oszczędzania: " << miesiace << "\n";
-    cout << "Oprocentowanie środków (w skali rocznej): " << procent << "\n";
-    cout << "Częstotliwość kapitalizacji (co ile miesięcy): " << kapita << "\n";
-    cout << "Miesięczna wplata: " << wplata << "\n";
-    return;
+void choices(){ // Wybory dotyczące danych
+    menu_load_mode();
+    menu_dynamic_values();
 }
 
-void draw_menu(){
+void result(){ // Wypisz wynik
+    cout << "\nWpłacone środki: " << wplacone << endl;
+    cout << "Odsetki: " << suma_odsetek << endl;
+    cout << "Suma oszczędności: " << wplacone+suma_odsetek << endl;
+}
+
+void draw_menu(){ // Główne menu
+    cout << "\n--------------------\n";
     choices();
     draw_data();
     calculate();
+    result();
 }
 
 int main()
 {
-    // bool running = true;
-    // while(running == true){
-    //     draw_menu();
-    // }
-    draw_menu();
-    // calculate();
+    bool running = true;
+    while(running == true){
+        draw_menu();
+    }
     return 0;
 }
