@@ -3,7 +3,7 @@
 #include <cstdlib>
 using namespace std;
 
-int miesiace = 24; // Ilość miesięcy oszczędzania
+int miesiace = 12; // Ilość miesięcy oszczędzania
 float procent = 5.5; // Oprocentowanie środków w skali rocznej
 float mies_proc = procent/12;
 int kapita = 1; // Częstotliwość kapitalizacji w miesiącach
@@ -14,9 +14,9 @@ double odsetki = 0;
 
 bool dynamic_values = false;
 int count_from = 0; // Miesiac od ktorego zmiany maja byc wprowadzone
-double new_percent = 0;
-int new_kapita = 0;
-double new_wplata = 0;
+double new_percent = procent;
+int new_kapita = kapita;
+double new_wplata = wplata;
 
 void create_config(){ // Stworzenie pliku wejściowego
     try
@@ -54,6 +54,10 @@ void load_config(){ // Wczytanie danych wejściowych z pliku
         procent = stod(lines[1]);
         kapita = stoi(lines[2]);
         wplata = stod(lines[3]);
+
+        new_percent = procent;
+        new_kapita = kapita;
+        new_wplata = wplata;
     }
     catch(const std::exception& e)
     {
@@ -132,6 +136,7 @@ void choices(){ // Wybieranie trybu wprowadzania danych
 
         cout << "Od ktorego miesiaca wartosc ma sie zmienic?\n";
         cin >> month;
+        count_from = stoi(month);
     }
     else
     {
@@ -140,16 +145,34 @@ void choices(){ // Wybieranie trybu wprowadzania danych
 }
 
 void calculate(){ // Właściwe obliczenia
+    float odsetki_nienaliczone = 0;
+    int loop = kapita-1;
     for (int i = 0; i < miesiace; i++) {
-        odsetki = wynik * mies_proc / 100;
-        wynik += odsetki;
-        
 
+        if(dynamic_values == true || count_from == i){
+            procent = new_percent;
+            mies_proc = procent/12;
+            kapita = new_kapita;
+            wplata = new_wplata;
+        }
+        
+        odsetki = wynik * mies_proc / 100;
+        odsetki_nienaliczone += odsetki;
+
+        if(loop == 0){
+            wynik += odsetki_nienaliczone;
+            odsetki_nienaliczone = 0;
+            loop = kapita;
+        }
+
+        cout << "loop" << loop << endl;
         cout << "miesiac" << i << endl;
         cout << "odsetki: " << odsetki << endl;
+        cout << "proc" << procent << endl;
         cout << "wynik: " << wynik << endl;
         cout << "\n";
         wynik += wplata;
+        loop--;
     }
 
     return;
@@ -165,8 +188,8 @@ void draw_data(){ // Wypisz wprowadzone dane
 }
 
 void draw_menu(){
-    // choices();
-    // draw_data();
+    choices();
+    draw_data();
     calculate();
 }
 
@@ -176,7 +199,7 @@ int main()
     // while(running == true){
     //     draw_menu();
     // }
-
-    calculate();
+    draw_menu();
+    // calculate();
     return 0;
 }
