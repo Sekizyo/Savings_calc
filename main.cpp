@@ -71,71 +71,36 @@ void load_config(){ // Wczytanie danych wejściowych z pliku
 }
 
 void manual_config(){ // Ręcznie wprowadzanie danych
-    int a = 0;
+    string temp_procent;
+    string temp_kapita;
+    string temp_wplata;
+
+    cout << "\nPodaj oprocentowanie: \n";
+    cin >> temp_procent;
+
+    cout << "Podaj częstotliwość kapitalizacji (w miesiącach): \n";
+    cin >> temp_kapita;
+
+    cout << "Podaj miesięczną wplatę: \n";
+    cin >> temp_wplata;
+
+    try
+    {
+        procent = stod(temp_procent);
+        kapita = stoi(temp_kapita);
+        wplata = stod(temp_wplata);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << '\n';
+        cout << "Podano błędne wartości\n";
+        manual_config();
+    }
+    return;
 }
 
 void save_data(){ // Zapisanie wyniku do pliku
     int a = 0;
-}
-
-
-void calculate(){ // Właściwe obliczenia
-    float odsetki_nienaliczone = 0;
-    int loop = kapita-1;
-    for (int i = 0; i < miesiace; i++) {
-
-        if(dynamic_values == true && count_from == i){ // Wprowadzenie dynamicznych danych
-            procent = new_procent;
-            mies_proc = procent/12;
-            kapita = new_kapita;
-            wplata = new_wplata;
-        }
-        
-        odsetki = wynik * mies_proc / 100;
-        odsetki_nienaliczone += odsetki;
-
-        wplacone += wplata;
-        suma_odsetek += odsetki;
-
-        if(loop == 0){ // Naliczanie odsetek
-            wynik += odsetki_nienaliczone;
-            odsetki_nienaliczone = 0;
-            loop = kapita;
-        }
-
-        // cout << "loop" << loop << endl;
-        // cout << "miesiac" << i << endl;
-        // cout << "odsetki: " << odsetki << endl;
-        // cout << "proc" << procent << endl;
-        // cout << "wynik: " << wynik << endl;
-        // cout << "\n";
-        wynik += wplata; // TODO add save to file
-        loop--;
-    }
-
-    return;
-}
-
-void draw_data(){ // Wypisz wprowadzone dane
-    cout << "\nIlość miesięcy oszczędzania: " << miesiace << "\n";
-    cout << "Oprocentowanie środków (w skali rocznej): " << procent << "\n";
-    cout << "Częstotliwość kapitalizacji (co ile miesięcy): " << kapita << "\n";
-    cout << "Miesięczna wplata: " << wplata << "\n";
-
-    if(dynamic_values == true){
-        cout << "\nZmienne wartości:\n";
-        cout << "Zmienia sie od miesiąca: " << count_from << endl;
-        if(new_procent != procent){
-            cout << "Oprocentowanie: " << new_procent << endl;
-        }
-        if(new_kapita != kapita){
-            cout << "Kapitalizacja: " << new_kapita << endl;
-        }
-        if(new_wplata != wplata){
-            cout << "Wplata: " << new_wplata << endl;
-        }
-    }
-    return;
 }
 
 void menu_load_mode(){ // Wybierz tryb ładowania danych
@@ -206,9 +171,63 @@ void menu_dynamic_values(){ // Wybierz dynamiczne dane
 
 }
 
-void choices(){ // Wybory dotyczące danych
-    menu_load_mode();
-    menu_dynamic_values();
+void draw_data(){ // Wypisz wprowadzone dane
+    cout << "\nIlość miesięcy oszczędzania: " << miesiace << "\n";
+    cout << "Oprocentowanie środków (w skali rocznej): " << procent << "\n";
+    cout << "Częstotliwość kapitalizacji (co ile miesięcy): " << kapita << "\n";
+    cout << "Miesięczna wplata: " << wplata << "\n";
+
+    if(dynamic_values == true){
+        cout << "\nZmienne wartości:\n";
+        cout << "Zmienia sie od miesiąca: " << count_from << endl;
+        if(new_procent != procent){
+            cout << "Oprocentowanie: " << new_procent << endl;
+        }
+        if(new_kapita != kapita){
+            cout << "Kapitalizacja: " << new_kapita << endl;
+        }
+        if(new_wplata != wplata){
+            cout << "Wplata: " << new_wplata << endl;
+        }
+    }
+    return;
+}
+
+void calculate(){ // Właściwe obliczenia
+    float odsetki_nienaliczone = 0;
+    int loop = kapita-1;
+    for (int i = 0; i < miesiace; i++) {
+
+        if(dynamic_values == true && count_from == i){ // Wprowadzenie dynamicznych danych
+            procent = new_procent;
+            mies_proc = procent/12;
+            kapita = new_kapita;
+            wplata = new_wplata;
+        }
+        
+        odsetki = wynik * mies_proc / 100;
+        odsetki_nienaliczone += odsetki;
+
+        wplacone += wplata;
+        suma_odsetek += odsetki;
+
+        if(loop == 0){ // Naliczanie odsetek
+            wynik += odsetki_nienaliczone;
+            odsetki_nienaliczone = 0;
+            loop = kapita;
+        }
+
+        // cout << "loop" << loop << endl;
+        // cout << "miesiac" << i << endl;
+        // cout << "odsetki: " << odsetki << endl;
+        // cout << "proc" << procent << endl;
+        // cout << "wynik: " << wynik << endl;
+        // cout << "\n";
+        wynik += wplata; // TODO add save to file
+        loop--;
+    }
+
+    return;
 }
 
 void result(){ // Wypisz wynik
@@ -219,9 +238,14 @@ void result(){ // Wypisz wynik
 
 void draw_menu(){ // Główne menu
     cout << "\n--------------------\n";
-    choices();
+
+    menu_load_mode();// Wybory dotyczące danych
+    menu_dynamic_values();
+
     draw_data();
+
     calculate();
+
     result();
 }
 
