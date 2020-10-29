@@ -20,6 +20,18 @@ double new_procent = procent;
 int new_kapita = kapita;
 double new_wplata = wplata;
 
+double output_wynik[1200];
+
+double output_odsetki[1200];
+double output_suma_odsetek[1200];
+double output_odsetki_nienaliczone[1200];
+
+double output_wplata[1200];
+double output_wplacono[1200];
+
+double output_procent[1200];
+int output_kapita[1200];
+
 void create_config(){ // Stworzenie pliku wejściowego
     try
     {
@@ -33,6 +45,23 @@ void create_config(){ // Stworzenie pliku wejściowego
         exit(0);
     }
     cout << "Poprawnie utworzono plik\n";
+    return;
+}
+
+void create_output(){ // Stworzenie pliku wyjściowego
+    try
+    {
+        std::ofstream outfile ("output.txt");
+        outfile.close();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << "\n";
+        cout << "Nie mozna utworzyć pliku\n";
+        exit(0);
+    }
+    cout << "Poprawnie utworzono plik\n";
+    return;
 }
 
 void load_config(){ // Wczytanie danych wejściowych z pliku
@@ -41,10 +70,7 @@ void load_config(){ // Wczytanie danych wejściowych z pliku
     string lines[4];
     ifstream input_file("config.txt"); // Otwarcie pliku
 
-    if (!input_file){ // Sprawdzenie czy plik istnieje
-        create_config();
-        ifstream input_file("config.txt");
-        }
+    if (!input_file){create_config();}// Sprawdzenie czy plik istnieje
 
     while(getline (input_file, line)) { // Odczytanie wszytkich lini z pliku i zapisanie ich w liście
         lines[loop] = line;
@@ -67,6 +93,7 @@ void load_config(){ // Wczytanie danych wejściowych z pliku
     {
         std::cerr << "Error: " << e.what() << ", Błąd podczas konwersji\n";
         cout << "Wprowadzono błędne dane \n";
+        exit(0);
     }
     
     return;
@@ -86,7 +113,7 @@ void manual_config(){ // Ręcznie wprowadzanie danych
     cout << "Podaj miesięczną wplatę: \n";
     cin >> temp_wplata;
 
-    try
+    try // Sprawdzanie poprawności wprowadzonych danych
     {
         procent = stod(temp_procent);
         kapita = stoi(temp_kapita);
@@ -102,14 +129,33 @@ void manual_config(){ // Ręcznie wprowadzanie danych
 }
 
 void save_data(){ // Zapisanie wyniku do pliku
-    int a = 0;
+    ofstream output_file("output.txt"); // Otwarcie pliku
+
+    if (!output_file){create_output();}// Sprawdzenie czy plik istnieje
+
+    output_file << "<M-c>  <Kapitał>  <Kwota wpłacona w miesiącu> <Całkowita wpłacona kwota> <Odsetki naliczone w miesiącu> <Odsetki nie naliczone> <Suma odsetek> <Oprocentowanie w skali roku> <Czas do pakitalizacji>\n"; 
+    for(int i=0; i<miesiace; i++){
+        output_file << i+1 << "   ";
+        output_file << output_wynik[i] << " zł   ";
+        output_file << output_wplata[i] << " zł   ";
+        output_file << output_wplacono[i] << " zł   ";
+        output_file << output_odsetki[i] << " zł   ";
+        output_file << output_odsetki_nienaliczone[i] << " zł   ";
+        output_file << output_suma_odsetek[i] << " zł   ";
+        output_file << output_procent[i] << "%   ";
+        output_file << output_kapita[i] << "   \n";
+
+    }
+
+    output_file.close();
+    return;
 }
 
 void menu_load_mode(){ // Wybierz tryb ładowania danych
     string mode;
     cout << "Wybierz tryb wprowadzania danych: \n";
     cout << "1. Zaladuj z pliku\n";
-    cout << "2. Wprowadz recznie\n";
+    cout << "2. Wprowadz ręcznie\n";
     cin >> mode;
 
     if(mode == "1"){
@@ -121,7 +167,7 @@ void menu_load_mode(){ // Wybierz tryb ładowania danych
     }
     else
     {
-        cout << "Wprowadz poprawną wartosc\n";
+        cout << "Podano błędne wartość\n";
         menu_load_mode();
     }
     return;
@@ -130,9 +176,8 @@ void menu_load_mode(){ // Wybierz tryb ładowania danych
 void menu_dynamic_values(){ // Wybierz dynamiczne dane
     string dynamic;
 
-
     cout << "\nZmienne wartosci?\n";
-    cout << "t - Tak\nn - Nie \n";
+    cout << "t - Tak \nn - Nie \n";
     cin >> dynamic; //TODO add podatek
 
     if(dynamic == "t"){
@@ -153,15 +198,15 @@ void menu_dynamic_values(){ // Wybierz dynamiczne dane
         cout << "Podaj nowa wartosc\n";
         if(wyb == "1")
         {
-            cin >> new_procent; // TODO variable conversion
+            cin >> temp_procent;
         }
         else if (wyb == "2")
         {
-            cin >> new_kapita;
+            cin >> temp_kapita;
         }
         else if (wyb == "3")    
         {
-            cin >> new_wplata;
+            cin >> temp_wplata;
         }
         else 
         {
@@ -171,7 +216,21 @@ void menu_dynamic_values(){ // Wybierz dynamiczne dane
 
         cout << "Od ktorego miesiaca wartosc ma sie zmienic?\n";
         cin >> month;
-        count_from = stoi(month);
+
+        try // Sprawdzanie poprawności wprowadzonych danych
+        {
+            count_from = stoi(month);
+            new_procent = stod(temp_procent);
+            new_kapita = stoi(temp_kapita);
+            new_wplata = stod(temp_wplata);
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << "Error: " << e.what() << ", Błąd podczas konwersji\n";
+            cout << "Wprowadzono błędne dane \n";
+            menu_dynamic_values();
+        }
+        
     }
     return;
 
@@ -229,17 +288,32 @@ void calculate(){ // Właściwe obliczenia
         // cout << "proc" << procent << endl;
         // cout << "wynik: " << wynik << endl;
         // cout << "\n";
+
+        // Zapis do pliku
+        output_wynik[i] = wynik;
+
+        output_odsetki[i] = odsetki;
+        output_suma_odsetek[i] = suma_odsetek;
+        output_odsetki_nienaliczone[i] = odsetki_nienaliczone;
+
+        output_wplata[i] = wplata;
+        output_wplacono[i] = wplacone;
+
+        output_procent[i] = procent;
+        output_kapita[i] = loop;
+
         wynik += wplata; // TODO add save to file
         loop--;
     }
-
+    save_data();
     return;
 }
 
-void result(){ // Wypisz wynik
+void result(){ // Wyświetl rezultat
     cout << "\nWpłacone środki: " << wplacone << endl;
     cout << "Odsetki: " << suma_odsetek << endl;
     cout << "Suma oszczędności: " << wplacone+suma_odsetek << endl;
+    return;
 }
 
 void draw_menu(){ // Główne menu
@@ -248,11 +322,12 @@ void draw_menu(){ // Główne menu
     menu_load_mode();// Wybory dotyczące danych
     menu_dynamic_values();
 
-    draw_data();
+    draw_data(); // Wyświetl wprowadzone dane
 
-    calculate();
-
-    result();
+    calculate(); // Właściwe obliczenia
+ 
+    result(); // Wyświetl rezultat
+    return;
 }
 
 int main()
