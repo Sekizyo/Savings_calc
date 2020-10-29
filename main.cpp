@@ -220,7 +220,7 @@ void menu_dynamic_values(){ // Wybierz dynamiczne dane
         try // Sprawdzanie poprawności wprowadzonych danych
         {
             count_from = stoi(month);
-            new_procent = stod(temp_procent);
+            new_procent = stod(temp_procent); //TODO  fix conversion 
             new_kapita = stoi(temp_kapita);
             new_wplata = stod(temp_wplata);
         }
@@ -264,7 +264,7 @@ void calculate(){ // Właściwe obliczenia
     for (int i = 0; i < miesiace; i++) {
 
         if(dynamic_values == true && count_from == i){ // Wprowadzenie dynamicznych danych
-            procent = new_procent;
+            procent = new_procent; // TODO fix if end of savings capitalise
             mies_proc = procent/12;
             kapita = new_kapita;
             wplata = new_wplata;
@@ -276,7 +276,7 @@ void calculate(){ // Właściwe obliczenia
         wplacone += wplata;
         suma_odsetek += odsetki;
 
-        if(loop == 0){ // Naliczanie odsetek
+        if(loop == 0 || i == miesiace){ // Naliczanie odsetek
             wynik += odsetki_nienaliczone;
             odsetki_nienaliczone = 0;
             loop = kapita;

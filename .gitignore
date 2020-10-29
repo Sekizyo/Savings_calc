@@ -2,3 +2,4 @@ main
 config.txt
 .vscode/tasks.json
 .vscode/launch.json
+output.txt
