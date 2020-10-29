@@ -33,7 +33,6 @@ void create_config(){ // Stworzenie pliku wejściowego
         exit(0);
     }
     cout << "Poprawnie utworzono plik\n";
-    exit(0);
 }
 
 void load_config(){ // Wczytanie danych wejściowych z pliku
@@ -42,7 +41,10 @@ void load_config(){ // Wczytanie danych wejściowych z pliku
     string lines[4];
     ifstream input_file("config.txt"); // Otwarcie pliku
 
-    if (!input_file){create_config();} // Sprawdzenie czy plik istnieje
+    if (!input_file){ // Sprawdzenie czy plik istnieje
+        create_config();
+        ifstream input_file("config.txt");
+        }
 
     while(getline (input_file, line)) { // Odczytanie wszytkich lini z pliku i zapisanie ich w liście
         lines[loop] = line;
@@ -128,6 +130,7 @@ void menu_load_mode(){ // Wybierz tryb ładowania danych
 void menu_dynamic_values(){ // Wybierz dynamiczne dane
     string dynamic;
 
+
     cout << "\nZmienne wartosci?\n";
     cout << "t - Tak\nn - Nie \n";
     cin >> dynamic; //TODO add podatek
@@ -135,6 +138,9 @@ void menu_dynamic_values(){ // Wybierz dynamiczne dane
     if(dynamic == "t"){
         string wyb;
         string month;
+        string temp_procent;
+        string temp_kapita;
+        string temp_wplata;
 
         dynamic_values = true;
 
@@ -159,7 +165,7 @@ void menu_dynamic_values(){ // Wybierz dynamiczne dane
         }
         else 
         {
-            cout << "Podaj poprawną wartość\n";
+            cout << "Podano błędne wartość\n";
             menu_dynamic_values();
         }
 
