@@ -32,26 +32,12 @@ double output_wplacono[1200];
 double output_procent[1200];
 int output_kapita[1200];
 
-void create_config(){ // Stworzenie pliku wejściowego
-    try
-    {
-        std::ofstream outfile ("config.txt");
-        outfile.close();
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << "Error: " << e.what() << "\n";
-        cout << "Nie mozna utworzyć pliku\n";
-        exit(0);
-    }
-    cout << "Poprawnie utworzono plik\n";
-    return;
-}
 
-void create_output(){ // Stworzenie pliku wyjściowego
+
+void create_file(string name){ // Stwórz plik
     try
     {
-        std::ofstream outfile ("output.txt");
+        std::ofstream outfile (name+".txt");
         outfile.close();
     }
     catch(const std::exception& e)
@@ -70,7 +56,7 @@ void load_config(){ // Wczytanie danych wejściowych z pliku
     string lines[4];
     ifstream input_file("config.txt"); // Otwarcie pliku
 
-    if (!input_file){create_config();}// Sprawdzenie czy plik istnieje
+    if (!input_file){create_file("config");}// Sprawdzenie czy plik istnieje
 
     while(getline (input_file, line)) { // Odczytanie wszytkich lini z pliku i zapisanie ich w liście
         lines[loop] = line;
@@ -131,7 +117,7 @@ void manual_config(){ // Ręcznie wprowadzanie danych
 void save_data(){ // Zapisanie wyniku do pliku
     ofstream output_file("output.txt"); // Otwarcie pliku
 
-    if (!output_file){create_output();}// Sprawdzenie czy plik istnieje
+    if (!output_file){create_file("output");}// Sprawdzenie czy plik istnieje
 
     output_file << "<M-c>  <Kapitał>  <Kwota wpłacona w miesiącu> <Całkowita wpłacona kwota> <Odsetki naliczone w miesiącu> <Odsetki nie naliczone> <Suma odsetek> <Oprocentowanie w skali roku> <Czas do pakitalizacji>\n"; 
     for(int i=0; i<miesiace; i++){
@@ -146,6 +132,9 @@ void save_data(){ // Zapisanie wyniku do pliku
         output_file << output_kapita[i] << "   \n";
 
     }
+    output_file << "\nWpłacone środki: " << wplacone << endl;
+    output_file << "Odsetki: " << suma_odsetek << endl;
+    output_file << "Suma oszczędności: " << wplacone+suma_odsetek << endl;
 
     output_file.close();
     return;
@@ -233,7 +222,6 @@ void menu_dynamic_values(){ // Wybierz dynamiczne dane
         
     }
     return;
-
 }
 
 void draw_data(){ // Wypisz wprowadzone dane
@@ -276,18 +264,11 @@ void calculate(){ // Właściwe obliczenia
         wplacone += wplata;
         suma_odsetek += odsetki;
 
-        if(loop == 0 || i == miesiace){ // Naliczanie odsetek
+        if(loop == 0 && i==miesiace){ // Naliczanie odsetek
             wynik += odsetki_nienaliczone;
             odsetki_nienaliczone = 0;
             loop = kapita;
         }
-
-        // cout << "loop" << loop << endl;
-        // cout << "miesiac" << i << endl;
-        // cout << "odsetki: " << odsetki << endl;
-        // cout << "proc" << procent << endl;
-        // cout << "wynik: " << wynik << endl;
-        // cout << "\n";
 
         // Zapis do pliku
         output_wynik[i] = wynik;
