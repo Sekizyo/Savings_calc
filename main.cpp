@@ -14,11 +14,13 @@ double odsetki = 0;
 double suma_odsetek = 0;
 double wplacone = 0;
 
-bool dynamic_values = false;
+bool dynamic_values_bool = false;
+//TODO del
 int count_from = 0; // Miesiac od ktorego zmiany maja byc wprowadzone
-double new_procent = procent;
-int new_kapita = kapita;
-double new_wplata = wplata;
+float new_procent = 0;
+int new_kapita = 0;
+float new_wplata = 0;
+//----
 
 double output_wynik[1200];
 
@@ -32,7 +34,12 @@ double output_wplacono[1200];
 double output_procent[1200];
 int output_kapita[1200];
 
-
+struct Values{
+    int count_from = 0; // Miesiac od ktorego zmiany maja byc wprowadzone
+    float procent = 0; // Oprocentowanie środków w skali rocznej
+    int kapitalizacja = 0; // Częstotliwość kapitalizacji w miesiącach
+    float mies_wplata = 0; // Miesięczna wpłata
+};
 
 void create_file(string name){ // Stwórz plik
     try
@@ -53,7 +60,7 @@ void create_file(string name){ // Stwórz plik
 void load_config(){ // Wczytanie danych wejściowych z pliku
     int loop = 0;
     string line; 
-    string lines[4];
+    string lines[4]; //TODO CHange this
     ifstream input_file("config.txt"); // Otwarcie pliku
 
     if (!input_file){create_file("config");}// Sprawdzenie czy plik istnieje
@@ -81,7 +88,6 @@ void load_config(){ // Wczytanie danych wejściowych z pliku
         cout << "Wprowadzono błędne dane \n";
         exit(0);
     }
-    
     return;
 }
 
@@ -162,7 +168,7 @@ void menu_load_mode(){ // Wybierz tryb ładowania danych
     return;
 }
 
-void menu_dynamic_values(){ // Wybierz dynamiczne dane
+Values menu_dynamic_values(){ // Wybierz dynamiczne dane
     string dynamic;
 
     cout << "\nZmienne wartosci?\n";
@@ -174,44 +180,31 @@ void menu_dynamic_values(){ // Wybierz dynamiczne dane
         string month;
         string temp_procent;
         string temp_kapita;
-        string temp_wplata;
+        string temp_wplata; //TODO change variable names
 
-        dynamic_values = true;
+        dynamic_values_bool = true;
 
-        cout << "Ktora wartosc ma byc dynamiczna?\n";
         cout << "1. Oprocentowanie\n";
+        cin >> temp_procent;
+
         cout << "2. Czestotliwosc kapitalizacji\n";
+        cin >> temp_kapita;
+
         cout << "3. Miesieczna wplata\n";
-        cin >> wyb;
+        cin >> temp_wplata;
 
-        cout << "Podaj nowa wartosc\n";
-        if(wyb == "1")
-        {
-            cin >> temp_procent;
-        }
-        else if (wyb == "2")
-        {
-            cin >> temp_kapita;
-        }
-        else if (wyb == "3")    
-        {
-            cin >> temp_wplata;
-        }
-        else 
-        {
-            cout << "Podano błędne wartość\n";
-            menu_dynamic_values();
-        }
-
-        cout << "Od ktorego miesiaca wartosc ma sie zmienic?\n";
+        cout << "Od ktorego miesiaca wartosci maja sie zmienic?\n";
         cin >> month;
 
         try // Sprawdzanie poprawności wprowadzonych danych
         {
-            count_from = stoi(month);
-            new_procent = stod(temp_procent); //TODO  fix conversion 
-            new_kapita = stoi(temp_kapita);
-            new_wplata = stod(temp_wplata);
+            Values values;
+            values.count_from = stoi(month);
+            values.procent = stof(temp_procent); //TODO  fix conversion 
+            values.kapitalizacja = stoi(temp_kapita);
+            values.mies_wplata = stof(temp_wplata);
+
+            return values;
         }
         catch(const std::exception& e)
         {
@@ -219,39 +212,40 @@ void menu_dynamic_values(){ // Wybierz dynamiczne dane
             cout << "Wprowadzono błędne dane \n";
             menu_dynamic_values();
         }
-        
     }
-    return;
+
+    Values empty_values;
+    return empty_values;
 }
 
-void draw_data(){ // Wypisz wprowadzone dane
+void draw_data(Values dynamic_values){ // Wypisz wprowadzone dane
     cout << "\nIlość miesięcy oszczędzania: " << miesiace << "\n";
     cout << "Oprocentowanie środków (w skali rocznej): " << procent << "\n";
     cout << "Częstotliwość kapitalizacji (co ile miesięcy): " << kapita << "\n";
     cout << "Miesięczna wplata: " << wplata << "\n";
 
-    if(dynamic_values == true){
+    if(dynamic_values_bool == true){
         cout << "\nZmienne wartości:\n";
-        cout << "Zmienia sie od miesiąca: " << count_from << endl;
-        if(new_procent != procent){
-            cout << "Oprocentowanie: " << new_procent << endl;
+        cout << "Zmienia sie od miesiąca: " << dynamic_values.count_from << endl;
+        if(dynamic_values.procent != procent){
+            cout << "Oprocentowanie: " << dynamic_values.procent << endl;
         }
-        if(new_kapita != kapita){
-            cout << "Kapitalizacja: " << new_kapita << endl;
+        if(dynamic_values.kapitalizacja != kapita){
+            cout << "Kapitalizacja: " << dynamic_values.kapitalizacja << endl;
         }
-        if(new_wplata != wplata){
-            cout << "Wplata: " << new_wplata << endl;
+        if(dynamic_values.mies_wplata != wplata){
+            cout << "Wplata: " << dynamic_values.mies_wplata << endl;
         }
     }
     return;
 }
 
-void calculate(){ // Właściwe obliczenia
+void calculate(Values dynamic_values){ // Właściwe obliczenia
     float odsetki_nienaliczone = 0;
     int loop = kapita-1;
     for (int i = 0; i < miesiace; i++) {
 
-        if(dynamic_values == true && count_from == i){ // Wprowadzenie dynamicznych danych
+        if(dynamic_values_bool == true && count_from == i){ // Wprowadzenie dynamicznych danych
             procent = new_procent; // TODO fix if end of savings capitalise
             mies_proc = procent/12;
             kapita = new_kapita;
@@ -298,16 +292,17 @@ void result(){ // Wyświetl rezultat
 }
 
 void draw_menu(){ // Główne menu
+    Values dynamic_values;
     cout << "\n--------------------\n";
 
     menu_load_mode();// Wybory dotyczące danych
-    menu_dynamic_values();
+    dynamic_values = menu_dynamic_values();
 
-    draw_data(); // Wyświetl wprowadzone dane
+    draw_data(dynamic_values); // Wyświetl wprowadzone dane
 
-    calculate(); // Właściwe obliczenia
+    // calculate(); // Właściwe obliczenia
  
-    result(); // Wyświetl rezultat
+    // result(); // Wyświetl rezultat
     return;
 }
 
