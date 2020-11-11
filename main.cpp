@@ -1,23 +1,24 @@
 // Matas Pieczulis 3T
 // Informatyka
 // Zadanie: Należy napisać program konsolowy w C++, który sporządzi raport z symulacji oszczędzania na tzw. "procent składany'.
+
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 using namespace std;
 
-bool dynamic_values_bool = false;
-struct Values{
+bool dynamic_values_bool = false; // Dynamiczna wartość //TODO rename
+struct Values{ // Struktura do wygodnego zwracania wartości
     int miesiac = 0; // Miesiac od ktorego zmiany maja byc wprowadzone
     float procent = 0; // Oprocentowanie środków w skali rocznej
     int kapitalizacja = 0; // Częstotliwość kapitalizacji w miesiącach
     float mies_wplata = 0; // Miesięczna wpłata
 };
 
-struct Result{
+struct Result{ // Struktura do wygodnego zwracania wyniku
     float miesiac = 0; // Miesiące oszczędziania
-    float wplacone = 0; 
-    float odsetki = 0;
+    float wplacone = 0; // Suma wpłaconych pieniędzy
+    float odsetki = 0; // Suma odsetek
     float suma = 0;
 };
 
@@ -29,8 +30,8 @@ void create_file(string name){ // Stwórz plik
     }
     catch(const std::exception& e)
     {
-        std::cerr << "Error: " << e.what() << "\n";
-        cout << "Nie mozna utworzyć pliku\n";
+        std::cerr << "Error: " << e.what();
+        cout << "\nNie mozna utworzyć pliku\n";
         exit(0);
     }
     cout << "Poprawnie utworzono plik\n";
@@ -46,8 +47,8 @@ Values load_config(){ // Wczytanie danych wejściowych z pliku
     ifstream input_file("config.txt"); // Otwarcie pliku
     if (!input_file){create_file("config");}// Sprawdzenie czy plik istnieje
 
-    int loop = 0;
-    while(getline (input_file, line)) { // Odczytanie wszytkich lini z pliku i zapisanie ich w liście
+    int loop = 0; // Numer wiersza
+    while(getline (input_file, line)) { // Odczytanie wszytkich lini z pliku i zapisanie ich w array
         lines[loop] = line;
         loop++; 
     }
@@ -85,7 +86,6 @@ Values manual_config(){ // Ręcznie wprowadzanie danych
     cout << "Podaj miesięczną wplatę: \n";
     cin >> mies_wplata;
 
-
     try // Sprawdzanie poprawności wprowadzonych danych
     {
         values.miesiac = stoi(miesiac);
@@ -95,8 +95,8 @@ Values manual_config(){ // Ręcznie wprowadzanie danych
     }
     catch(const std::exception& e)
     {
-        std::cerr << "Error: " << e.what() << '\n';
-        cout << "Podano błędne wartości\n";
+        std::cerr << "Error: " << e.what();
+        cout << "\nPodano błędne wartości\n";
         manual_config();
     }
     return values;
@@ -119,13 +119,13 @@ Values menu_load_mode(){ // Wybierz tryb ładowania danych
 }
 
 Values menu_dynamic_values(){ // Wybierz dynamiczne dane
+    Values values;
     string wyb;
 
     cout << "\nZmienne wartosci?\nt - Tak \nn - Nie \n";
-    cin >> wyb; //TODO feature add podatek
+    cin >> wyb; //TODO add feature: podatek
 
     if(wyb == "t"){
-        dynamic_values_bool = true;
         string miesiac, procent, kapita, wplata;
 
         cout << "Od ktorego miesiaca wartosci maja sie zmienic?\n";
@@ -142,7 +142,7 @@ Values menu_dynamic_values(){ // Wybierz dynamiczne dane
 
         try // Sprawdzanie poprawności wprowadzonych danych
         {
-            Values values;
+            dynamic_values_bool = true;
 
             values.miesiac = stoi(miesiac);
             values.procent = stof(procent); 
@@ -158,9 +158,9 @@ Values menu_dynamic_values(){ // Wybierz dynamiczne dane
             menu_dynamic_values();
         }
     }
+
     dynamic_values_bool = false;
-    Values empty_values;
-    return empty_values;
+    return values;
 }
 
 void draw_data(Values values, Values dynamic){ // Wypisz wprowadzone dane
@@ -185,28 +185,28 @@ Result calculate(Values values, Values dynamic_values){ // Właściwe obliczenia
     if (!output_file){create_file("output");}// Sprawdzenie czy plik istnieje
     output_file << "<M-c>  <Kapitał>  <Miesięczna wpłata> <Całkowita wpłacona kwota> <Odsetki naliczone w miesiącu> <Odsetki nie naliczone> <Suma odsetek> <Oprocentowanie w skali roku> <Czas do kapitalizacji>\n"; 
 
-    int miesiac = values.miesiac;
-    float wynik = values.mies_wplata;
+    int miesiac = values.miesiac; // Miesiące oszczędzania
+    float wynik = values.mies_wplata; // Suma zaoszczędzonych pieniędzy
     float mies_wplata = values.mies_wplata;
-    float wplacone = 0;
+    float wplacone = 0; // Całkowita wpłata
     float odsetki = 0;
-    float odsetki_nienaliczone = 0;
+    float odsetki_nienaliczone = 0; 
     float suma_odsetek = 0;
-    float procent = values.procent;
+    float procent = values.procent; // Oprocentowanie w skali rocznej
     float mies_proc = procent/12;
-    int loop = values.kapitalizacja;
+    int loop = values.kapitalizacja; // Miesiące do kapitalizacji
     int kapitalizacja = values.kapitalizacja;
 
     for (int i = 0; i < miesiac+1; i++) {
 
         if(dynamic_values_bool == true && dynamic_values.miesiac == i){ // Wprowadzenie dynamicznych danych
-            procent = dynamic_values.procent;
-            mies_proc = dynamic_values.procent/12;
-            kapitalizacja = dynamic_values.kapitalizacja;
-            mies_wplata = dynamic_values.mies_wplata;
+            if(procent != dynamic_values.procent) {procent = dynamic_values.procent;};
+            if(mies_proc != dynamic_values.procent/12) {mies_proc = dynamic_values.procent/12;};
+            if(kapitalizacja != dynamic_values.kapitalizacja) {kapitalizacja = dynamic_values.kapitalizacja;};
+            if(mies_wplata != dynamic_values.mies_wplata) {mies_wplata = dynamic_values.mies_wplata;};
         }
 
-        odsetki = wynik * mies_proc / 100;
+        odsetki = wynik * mies_proc / 100; //Obliczanie odsetek
         odsetki_nienaliczone += odsetki;
 
         wplacone += values.mies_wplata;
@@ -219,7 +219,7 @@ Result calculate(Values values, Values dynamic_values){ // Właściwe obliczenia
         }
 
         // Zapis do pliku
-        output_file << i+1 << "   "; // Miesiąc
+        output_file << i+1 << "   ";
         output_file << wynik << " zł   ";
         output_file << mies_wplata << " zł   ";
         output_file << wplacone << " zł   ";
@@ -227,7 +227,7 @@ Result calculate(Values values, Values dynamic_values){ // Właściwe obliczenia
         output_file << odsetki_nienaliczone << " zł   ";
         output_file << suma_odsetek << " zł   ";
         output_file << procent << "%   ";
-        output_file << loop << "   \n"; // Czas do kapitalizacji
+        output_file << loop << "   \n";
 
         wynik += mies_wplata; 
         loop--;
@@ -243,7 +243,7 @@ Result calculate(Values values, Values dynamic_values){ // Właściwe obliczenia
     return result;
 }
 
-void result(Result result){ // Wyświetl rezultat
+void result(Result result){ // Wyświetl wynik
     cout << "\n\nMiesiące oszczędzania: " << result.miesiac;
     cout << "\nWpłacone środki: " << result.wplacone;
     cout << "\nOdsetki: " << result.odsetki;
@@ -257,8 +257,8 @@ void draw_menu(){ // Główne menu
     Values dynamic_values;
     Result wynik;
 
-    values = menu_load_mode();// Wybory dotyczące danych
-    dynamic_values = menu_dynamic_values();
+    values = menu_load_mode(); // Wybory dotyczące wprowadzania danych
+    dynamic_values = menu_dynamic_values(); // Wybory dotyczące dynamicznych danych
 
     draw_data(values, dynamic_values); // Wyświetl wprowadzone dane
 
