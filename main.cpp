@@ -5,17 +5,15 @@
 #include <iostream>
 #include <fstream>
 
-#include <vector>
-#include <string>
 #include <sstream>
-#include <iostream>
+#include <algorithm>
 using namespace std;
 
 struct Values{ // Struktura do wygodnego zwracania wartości
     int miesiac = 0; // Miesiac od ktorego zmiany maja byc wprowadzone
     float result = 0; // Wynik
     float mies_wplata = 0; // Miesięczna wpłata
-    double procent = 0; // Oprocentowanie środków w skali rocznej
+    float procent = 0; // Oprocentowanie środków w skali rocznej
     int kapitalizacja = 0; // Częstotliwość kapitalizacji w miesiącach
 };
 
@@ -101,7 +99,28 @@ void calculate(Values values){ // Właściwe obliczenia
     return;
 }
 
-string load_result(){
+Values str_to_struct(string str){ // Podziel string na struct
+    int i = 0;
+
+    string arr[9];
+    stringstream ssin(str);
+
+    while (ssin.good() && i < 9){
+        ssin >> arr[i];
+        ++i;
+    }
+
+    Values values;
+    values.miesiac = stoi(arr[0]);
+    values.result = stof(arr[1]);
+    values.mies_wplata = stof(arr[2]);
+    values.procent = stof(arr[7]);
+    values.kapitalizacja = stoi(arr[8]);
+
+    return values;
+}
+
+Values load_result(){
     string line;
     ifstream output_file("output.csv"); // Otwarcie pliku
     if (!output_file){create_file("output.csv");}// Sprawdzenie czy plik istnieje
@@ -109,28 +128,8 @@ string load_result(){
     while (output_file >> ws && getline(output_file, line)); // Zwróć ostatnią linię
     output_file.close();
 
-    cout << line<< endl;
-
-    // line.replace(',', ", "); TODO
-    
-    vector<int> vect;
-    stringstream ss(line);
-
-    for (int i; ss >> i;) {
-        vect.push_back(i);    
-        if (ss.peek() == ',')
-            ss.ignore();
-    }
-
-    for (std::size_t i = 0; i < vect.size(); i++)
-        std::cout << "geg" << vect[i] << std::endl;
-
-    // ta funkcja działa tylko wtedy gdy wartości w LINIA są oddzielone spacją
-    // spróbój podmienić ',' na ", " czyli ze spacją
-    // następnie jeśli -c dopisz do pliku a nie nadpisuj
-    // -c nadpisz wartości początkowe;
-
-    return " ";
+    replace(line.begin(), line.end(), ',', ' '); // Podmień , na spację. str_to_struc rozdziela na podstaie spacji
+    return str_to_struct(line);
 }
 
 Values get_args(int argc, char const *argv[]){
@@ -149,9 +148,10 @@ Values get_args(int argc, char const *argv[]){
     }
     
     if(continuation){
-        load_result();
-        // cout << values.result << endl;
+        values = load_result();
     }
+
+
     return values;
 }
 
