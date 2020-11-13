@@ -7,12 +7,18 @@
 
 #include <sstream>
 #include <algorithm>
+
 using namespace std;
+
+bool conti_temp = false;
 
 struct Values{ // Struktura do wygodnego zwracania wartości
     int miesiac = 0; // Miesiac od ktorego zmiany maja byc wprowadzone
+    int miesiac_total = 0; 
     float result = 0; // Wynik
     float mies_wplata = 0; // Miesięczna wpłata
+    float suma_wplata = 0;
+    float suma_odsetek = 0;
     float procent = 0; // Oprocentowanie środków w skali rocznej
     int kapitalizacja = 0; // Częstotliwość kapitalizacji w miesiącach
 };
@@ -42,27 +48,37 @@ void create_file(string name){ // Stwórz plik
     return;
 }
 
-void draw_data(Values values){ // Wypisz wprowadzone dane
-    cout << "\nIlość miesięcy oszczędzania: " << values.miesiac;
-    cout << "\nOprocentowanie środków (w skali rocznej): " << values.procent;
-    cout << "\nCzęstotliwość kapitalizacji (co ile miesięcy): " << values.kapitalizacja;
-    cout << "\nMiesięczna wplata: " << values.mies_wplata;
-    return;
-}
-
 void calculate(Values values){ // Właściwe obliczenia
+    fstream output_file;
 
-    ofstream output_file("output.csv"); // Otwarcie pliku
-    if (!output_file){create_file("output.csv");}// Sprawdzenie czy plik istnieje
-    output_file << "<M-c>,<Kapitał>,<Miesięczna wpłata>,<Całkowita wpłacona kwota>,<Odsetki naliczone w miesiącu>,<Odsetki nie naliczone>,<Suma odsetek>,<Oprocentowanie w skali roku>,<Czas do kapitalizacji>\n"; 
+    if(conti_temp == true) {output_file.open("output.csv", std::ios_base::app | std::ios_base::in);} // Otwarcie pliku
+    else {output_file.open("output.csv", std::ofstream::out | std::ofstream::trunc);}
 
-    int miesiac = values.miesiac; // Miesiące oszczędzania
-    float wynik = values.mies_wplata; // Suma zaoszczędzonych pieniędzy
-    float mies_wplata = values.mies_wplata;
+    if(!output_file) {create_file("output.csv");}// Sprawdzenie czy plik istnieje
+
+    float wynik = 0;
+    int miesiac = 0; // Miesiące oszczędzania
     float wplacone = 0; // Całkowita wpłata
+    float suma_odsetek = 0;
+    float suma_wplata = 0;
+
+    if(!conti_temp){
+        output_file << "<M-c>,<Kapitał>,<Miesięczna wpłata>,<Całkowita wpłacona kwota>,<Odsetki naliczone w miesiącu>,<Odsetki nie naliczone>,<Suma odsetek>,<Oprocentowanie w skali roku>,<Czas do kapitalizacji>\n";
+    
+        wynik = values.mies_wplata; // Suma zaoszczędzonych pieniędzy
+        miesiac = values.miesiac; // Miesiące oszczędzania
+    }
+    else{
+        miesiac = values.miesiac; // Miesiące oszczędzania
+        wynik = values.result; // Suma zaoszczędzonych pieniędzy
+        suma_odsetek = values.suma_odsetek;
+        wplacone = values.suma_wplata;
+    }
+
+    // miesiac = values.miesiac; // Miesiące oszczędzania
+    float mies_wplata = values.mies_wplata;
     float odsetki = 0;
     float odsetki_nienaliczone = 0; 
-    float suma_odsetek = 0;
     float procent = values.procent; // Oprocentowanie w skali rocznej
     float mies_proc = procent/12;
     int loop = values.kapitalizacja-1; // Miesiące do kapitalizacji
@@ -82,7 +98,7 @@ void calculate(Values values){ // Właściwe obliczenia
         }
 
         // Zapis do pliku
-        output_file << i+1 << ",";
+        output_file << values.miesiac_total+i+1 << ",";
         output_file << wynik << ",";
         output_file << mies_wplata << ",";
         output_file << wplacone << ",";
@@ -99,7 +115,7 @@ void calculate(Values values){ // Właściwe obliczenia
     return;
 }
 
-Values str_to_struct(string str){ // Podziel string na struct
+Values str_to_struct(string str){ // Podziel string na struct Values
     int i = 0;
 
     string arr[9];
@@ -114,13 +130,17 @@ Values str_to_struct(string str){ // Podziel string na struct
     values.miesiac = stoi(arr[0]);
     values.result = stof(arr[1]);
     values.mies_wplata = stof(arr[2]);
+    values.suma_wplata = stof(arr[3]);
+    values.suma_odsetek = stof(arr[6]);
     values.procent = stof(arr[7]);
     values.kapitalizacja = stoi(arr[8]);
+
+    cout << values.miesiac << endl;
 
     return values;
 }
 
-Values load_result(){
+Values load_result(){ //Załaduj dane z pliku
     string line;
     ifstream output_file("output.csv"); // Otwarcie pliku
     if (!output_file){create_file("output.csv");}// Sprawdzenie czy plik istnieje
@@ -133,13 +153,13 @@ Values load_result(){
 }
 
 Values get_args(int argc, char const *argv[]){
-    Values values;
+    Values values, temp;
     bool continuation = false;
 
     for(int i=0; i<argc; i++){ // Sprawdzanie argumentów
         string arg = argv[i];
         if(arg == "-help" || arg == "/?") {draw_help();}
-        if(arg == "-c") {continuation = true;} 
+        if(arg == "-c") {continuation = true; conti_temp = true;} 
 
         if(i==1) {values.miesiac = stoi(arg);}
         else if(i==2) {values.mies_wplata = stof(arg);}
@@ -148,9 +168,15 @@ Values get_args(int argc, char const *argv[]){
     }
     
     if(continuation){
-        values = load_result();
-    }
+        temp = load_result();
+        temp.miesiac = values.miesiac;
+        temp.miesiac_total = temp.miesiac-1;
+        temp.mies_wplata = values.mies_wplata;
+        temp.procent = values.procent;
+        temp.kapitalizacja = values.kapitalizacja;
 
+        return temp;
+    }
 
     return values;
 }
