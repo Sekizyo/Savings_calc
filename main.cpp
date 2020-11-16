@@ -14,11 +14,11 @@ bool conti_temp = false;
 
 struct Values{ // Struktura do wygodnego zwracania wartości
     int miesiac = 0; // Miesiac od ktorego zmiany maja byc wprowadzone
-    int miesiac_total = 0; 
+    int miesiac_total = 0; // Poprzedni miesiąc zczytany z pliku
     float result = 0; // Wynik
     float mies_wplata = 0; // Miesięczna wpłata
-    float suma_wplata = 0;
-    float suma_odsetek = 0;
+    float suma_wplata = 0; // Suma wpłat
+    float suma_odsetek = 0; // Suma odsetek
     float procent = 0; // Oprocentowanie środków w skali rocznej
     int kapitalizacja = 0; // Częstotliwość kapitalizacji w miesiącach
 };
@@ -62,20 +62,6 @@ void calculate(Values values){ // Właściwe obliczenia
     float suma_odsetek = 0;
     float suma_wplata = 0;
 
-    if(!conti_temp){
-        output_file << "<M-c>,<Kapitał>,<Miesięczna wpłata>,<Całkowita wpłacona kwota>,<Odsetki naliczone w miesiącu>,<Odsetki nie naliczone>,<Suma odsetek>,<Oprocentowanie w skali roku>,<Czas do kapitalizacji>\n";
-    
-        wynik = values.mies_wplata; // Suma zaoszczędzonych pieniędzy
-        miesiac = values.miesiac; // Miesiące oszczędzania
-    }
-    else{
-        miesiac = values.miesiac; // Miesiące oszczędzania
-        wynik = values.result; // Suma zaoszczędzonych pieniędzy
-        suma_odsetek = values.suma_odsetek;
-        wplacone = values.suma_wplata;
-    }
-
-    // miesiac = values.miesiac; // Miesiące oszczędzania
     float mies_wplata = values.mies_wplata;
     float odsetki = 0;
     float odsetki_nienaliczone = 0; 
@@ -83,6 +69,19 @@ void calculate(Values values){ // Właściwe obliczenia
     float mies_proc = procent/12;
     int loop = values.kapitalizacja-1; // Miesiące do kapitalizacji
     int kapitalizacja = values.kapitalizacja;
+
+    if(conti_temp){
+        miesiac = values.miesiac; // Miesiące oszczędzania
+        wynik = values.result; // Suma zaoszczędzonych pieniędzy
+        suma_odsetek = values.suma_odsetek;
+        wplacone = values.suma_wplata;
+    }
+    else{
+        output_file << "<M-c>,<Kapitał>,<Miesięczna wpłata>,<Całkowita wpłacona kwota>,<Odsetki naliczone w miesiącu>,<Odsetki nie naliczone>,<Suma odsetek>,<Oprocentowanie w skali roku>,<Czas do kapitalizacji>\n";
+    
+        wynik = values.mies_wplata; // Suma zaoszczędzonych pieniędzy
+        miesiac = values.miesiac; // Miesiące oszczędzania
+    }
 
     for (int i = 0; i < miesiac; i++) {
         odsetki = wynik * mies_proc / 100; //Obliczanie odsetek
@@ -111,6 +110,7 @@ void calculate(Values values){ // Właściwe obliczenia
         wynik += mies_wplata; 
         loop--;
     }
+
     output_file.close(); 
     return;
 }
@@ -127,15 +127,13 @@ Values str_to_struct(string str){ // Podziel string na struct Values
     }
 
     Values values;
-    values.miesiac = stoi(arr[0]);
+    values.miesiac_total = stoi(arr[0]);
     values.result = stof(arr[1]);
     values.mies_wplata = stof(arr[2]);
     values.suma_wplata = stof(arr[3]);
     values.suma_odsetek = stof(arr[6]);
     values.procent = stof(arr[7]);
     values.kapitalizacja = stoi(arr[8]);
-
-    cout << values.miesiac << endl;
 
     return values;
 }
@@ -148,7 +146,7 @@ Values load_result(){ //Załaduj dane z pliku
     while (output_file >> ws && getline(output_file, line)); // Zwróć ostatnią linię
     output_file.close();
 
-    replace(line.begin(), line.end(), ',', ' '); // Podmień , na spację. str_to_struc rozdziela na podstaie spacji
+    replace(line.begin(), line.end(), ',', ' '); // Podmień ',' na ", "(przecinek + spacja). str_to_struc rozdziela na podstaie spacji
     return str_to_struct(line);
 }
 
@@ -170,7 +168,6 @@ Values get_args(int argc, char const *argv[]){
     if(continuation){
         temp = load_result();
         temp.miesiac = values.miesiac;
-        temp.miesiac_total = temp.miesiac-1;
         temp.mies_wplata = values.mies_wplata;
         temp.procent = values.procent;
         temp.kapitalizacja = values.kapitalizacja;
