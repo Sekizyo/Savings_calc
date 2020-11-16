@@ -10,8 +10,7 @@
 
 using namespace std;
 
-bool conti_temp = false;
-
+bool continuation = false;
 struct Values{ // Struktura do wygodnego zwracania wartości
     int miesiac = 0; // Miesiac od ktorego zmiany maja byc wprowadzone
     int miesiac_total = 0; // Poprzedni miesiąc zczytany z pliku
@@ -22,15 +21,6 @@ struct Values{ // Struktura do wygodnego zwracania wartości
     float procent = 0; // Oprocentowanie środków w skali rocznej
     int kapitalizacja = 0; // Częstotliwość kapitalizacji w miesiącach
 };
-
-void draw_help(){
-    cout << "\n----Help----\n";
-    cout << "usage: calc <Months> <Mies wplata> <Oprocen> <Kapita>\n";
-    cout << "\n---Other args---\n";
-    cout << "-c - continue calculations from output_file.txt\n";
-    exit(0);
-    return;
-}
 
 void create_file(string name){ // Stwórz plik
     try
@@ -51,10 +41,10 @@ void create_file(string name){ // Stwórz plik
 void calculate(Values values){ // Właściwe obliczenia
     fstream output_file;
 
-    if(conti_temp == true) {output_file.open("output.csv", std::ios_base::app | std::ios_base::in);} // Otwarcie pliku
-    else {output_file.open("output.csv", std::ofstream::out | std::ofstream::trunc);}
+    if(continuation == true) {output_file.open("output.csv", std::ios_base::app | std::ios_base::in);} // Otwarcie pliku w trybie dopisywania
+    else {output_file.open("output.csv", std::ofstream::out | std::ofstream::trunc);} // Otwarcie pliku w trybie nadpisywania
 
-    if(!output_file) {create_file("output.csv");}// Sprawdzenie czy plik istnieje
+    if(!output_file) {create_file("output.csv");} // Sprawdzenie czy plik istnieje
 
     float wynik = 0;
     int miesiac = 0; // Miesiące oszczędzania
@@ -65,12 +55,13 @@ void calculate(Values values){ // Właściwe obliczenia
     float mies_wplata = values.mies_wplata;
     float odsetki = 0;
     float odsetki_nienaliczone = 0; 
+
     float procent = values.procent; // Oprocentowanie w skali rocznej
-    float mies_proc = procent/12;
+    float mies_proc = procent/12; // Miesięczne oprocentowanie
     int loop = values.kapitalizacja-1; // Miesiące do kapitalizacji
     int kapitalizacja = values.kapitalizacja;
 
-    if(conti_temp){
+    if(continuation){
         miesiac = values.miesiac; // Miesiące oszczędzania
         wynik = values.result; // Suma zaoszczędzonych pieniędzy
         suma_odsetek = values.suma_odsetek;
@@ -115,6 +106,15 @@ void calculate(Values values){ // Właściwe obliczenia
     return;
 }
 
+void draw_help(){
+    cout << "\n----Help----\n";
+    cout << "usage: calc <Months> <Mies wplata> <Oprocen> <Kapita>\n";
+    cout << "\n---Other args---\n";
+    cout << "-c - continue calculations from output_file.txt\n";
+    exit(0);
+    return;
+}
+
 Values str_to_struct(string str){ // Podziel string na struct Values
     int i = 0;
 
@@ -127,14 +127,23 @@ Values str_to_struct(string str){ // Podziel string na struct Values
     }
 
     Values values;
-    values.miesiac_total = stoi(arr[0]);
-    values.result = stof(arr[1]);
-    values.mies_wplata = stof(arr[2]);
-    values.suma_wplata = stof(arr[3]);
-    values.suma_odsetek = stof(arr[6]);
-    values.procent = stof(arr[7]);
-    values.kapitalizacja = stoi(arr[8]);
-
+    try
+    {
+        values.miesiac_total = stoi(arr[0]);
+        values.result = stof(arr[1]);
+        values.mies_wplata = stof(arr[2]);
+        values.suma_wplata = stof(arr[3]);
+        values.suma_odsetek = stof(arr[6]);
+        values.procent = stof(arr[7]);
+        values.kapitalizacja = stoi(arr[8]);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        cout << "Wprowadzono błędne dane\n";
+        cout << "Nie można przeprowadzić kontynuacji na pustym pliku\n";
+    }
+    
     return values;
 }
 
@@ -151,28 +160,37 @@ Values load_result(){ //Załaduj dane z pliku
 }
 
 Values get_args(int argc, char const *argv[]){
-    Values values, temp;
-    bool continuation = false;
+    Values values, continuation_values;
+    cout << argc << endl;
 
     for(int i=0; i<argc; i++){ // Sprawdzanie argumentów
         string arg = argv[i];
         if(arg == "-help" || arg == "/?") {draw_help();}
-        if(arg == "-c") {continuation = true; conti_temp = true;} 
+        if(arg == "-c") {continuation = true;} 
 
-        if(i==1) {values.miesiac = stoi(arg);}
-        else if(i==2) {values.mies_wplata = stof(arg);}
-        else if(i==3) {values.procent = stof(arg);}
-        else if(i==4) {values.kapitalizacja = stoi(arg);}
+        try
+        {
+            if(i==1) {values.miesiac = stoi(arg);}
+            else if(i==2) {values.mies_wplata = stof(arg);}
+            else if(i==3) {values.procent = stof(arg);}
+            else if(i==4) {values.kapitalizacja = stoi(arg);}
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+            cout << "Wprowadzono błędne argumenty\n";
+        }
+        
     }
     
     if(continuation){
-        temp = load_result();
-        temp.miesiac = values.miesiac;
-        temp.mies_wplata = values.mies_wplata;
-        temp.procent = values.procent;
-        temp.kapitalizacja = values.kapitalizacja;
+        continuation_values = load_result();
+        continuation_values.miesiac = values.miesiac;
+        continuation_values.mies_wplata = values.mies_wplata;
+        continuation_values.procent = values.procent;
+        continuation_values.kapitalizacja = values.kapitalizacja;
 
-        return temp;
+        return continuation_values;
     }
 
     return values;
