@@ -18,7 +18,7 @@
 <!-- ABOUT THE PROJECT -->
 ## O projekcie
 Autor: Matas Pieczulis
-Projekt został wynonany na lekcję Informatyki
+Projekt został wykonany na lekcję Informatyki
 
 Zadanie: Należy napisać program konsolowy w C++, który sporządzi raport z symulacji oszczędzania na tzw. "procent składany'.
 
@@ -33,15 +33,15 @@ Zadanie: Należy napisać program konsolowy w C++, który sporządzi raport z sy
 git clone https://github.com/Sekyzio/Savings_calc.git
 ```
 
-Następnie należy skompilować plik main.cpp używająć kompilatora c++.
+2. Następnie należy skompilować plik main.cpp używająć kompilatora c++.
 
-```sh
-gcc main.cpp
-```
-Lub:
-```sh
-g++ main.cpp
-```
+  ```sh
+  gcc main.cpp
+  ```
+  Lub:
+  ```sh
+  g++ main.cpp
+  ```
 
 ## Używanie
 
@@ -55,11 +55,11 @@ By użyć programu należy wprowadzić odpowiednie argumenty.
 main.exe 12 500 2.5 1
 ```
 
-Wynik obliczeń zapisze do pliku "output.csv".
+Wynik obliczeń zapisuje do pliku "output.csv".
 
 
 ### Przykłady
-Będzie kontynułować obliczenia z pliku "output.csv" z nowymi wartościami.
+Będzie kontynuować obliczenia z pliku "output.csv" z nowymi wartościami.
 ```sh
  main.exe 36 750 2.2 1 -c
 ```

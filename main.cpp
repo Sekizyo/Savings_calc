@@ -13,8 +13,8 @@ using namespace std;
 bool continuation = false;
 struct Values{ // Struktura do wygodnego zwracania wartości
     int miesiac = 0; // Miesiac od ktorego zmiany maja byc wprowadzone
-    int miesiac_total = 0; // Poprzedni miesiąc zczytany z pliku
-    float result = 0; // Wynik
+    int miesiac_total = 0; // Poprzedni miesiąc wczytany z pliku
+    float result = 0; // Wynik obliczeń
     float mies_wplata = 0; // Miesięczna wpłata
     float suma_wplata = 0; // Suma wpłat
     float suma_odsetek = 0; // Suma odsetek
@@ -41,37 +41,37 @@ void create_file(string name){ // Stwórz plik
 void calculate(Values values){ // Właściwe obliczenia
     fstream output_file;
 
-    if(continuation == true) {output_file.open("output.csv", std::ios_base::app | std::ios_base::in);} // Otwarcie pliku w trybie dopisywania
+    if(continuation) {output_file.open("output.csv", std::ios_base::app | std::ios_base::in);} // Otwarcie pliku w trybie dopisywania
     else {output_file.open("output.csv", std::ofstream::out | std::ofstream::trunc);} // Otwarcie pliku w trybie nadpisywania
 
     if(!output_file) {create_file("output.csv");} // Sprawdzenie czy plik istnieje
 
-    float wynik = 0;
+    float wynik = 0; // Wynik obliczeń
     int miesiac = 0; // Miesiące oszczędzania
-    float wplacone = 0; // Całkowita wpłata
+    float wplacone = 0; // Całkowita wpłata bez odsetek
     float suma_odsetek = 0;
     float suma_wplata = 0;
 
     float mies_wplata = values.mies_wplata;
-    float odsetki = 0;
+    float odsetki = 0; // Całkowite odsetki
     float odsetki_nienaliczone = 0; 
 
     float procent = values.procent; // Oprocentowanie w skali rocznej
     float mies_proc = procent/12; // Miesięczne oprocentowanie
     int loop = values.kapitalizacja-1; // Miesiące do kapitalizacji
-    int kapitalizacja = values.kapitalizacja;
+    int kapitalizacja = values.kapitalizacja; // Jak często występuje kapitalizacja
 
-    if(continuation){
-        miesiac = values.miesiac; // Miesiące oszczędzania
-        wynik = values.result; // Suma zaoszczędzonych pieniędzy
+    if(continuation){ // Jeśli jest kontynuacja to nadpisz wczytane wartości
+        miesiac = values.miesiac;
+        wynik = values.result;
         suma_odsetek = values.suma_odsetek;
         wplacone = values.suma_wplata;
     }
     else{
         output_file << "<M-c>,<Kapitał>,<Miesięczna wpłata>,<Całkowita wpłacona kwota>,<Odsetki naliczone w miesiącu>,<Odsetki nie naliczone>,<Suma odsetek>,<Oprocentowanie w skali roku>,<Czas do kapitalizacji>\n";
     
-        wynik = values.mies_wplata; // Suma zaoszczędzonych pieniędzy
-        miesiac = values.miesiac; // Miesiące oszczędzania
+        wynik = values.mies_wplata;
+        miesiac = values.miesiac;
     }
 
     for (int i = 0; i < miesiac; i++) {
@@ -106,17 +106,18 @@ void calculate(Values values){ // Właściwe obliczenia
     return;
 }
 
-void draw_help(){
+void draw_help(){ // Wypisz pomoc
     cout << "\n----Help----\n";
     cout << "usage: main <Miesiące> <Mies wplata> <Oprocen> <Kapita>\n";
     cout << "\n---Other args---\n";
-    cout << "-c - kontynułuj kalkulacje z pliku" << "output.csv" << "\n";
-    cout << "Więcej info: https://github.com/Sekyzio/Savings_calc/blob/master/REDME.md\n";
+    cout << "-c - kontynuuj kalkulacje z pliku" << "output.csv" << "\n";
+    cout << "\nmore info: https://github.com/Sekyzio/Savings_calc/blob/master/README.md\n";
     exit(0);
     return;
 }
 
 Values str_to_struct(string str){ // Podziel string na struct Values
+    // Rozdziena na podstawie spacji
     int i = 0;
 
     string arr[9];
@@ -156,13 +157,12 @@ Values load_result(){ //Załaduj dane z pliku
     while (output_file >> ws && getline(output_file, line)); // Zwróć ostatnią linię
     output_file.close();
 
-    replace(line.begin(), line.end(), ',', ' '); // Podmień ',' na ", "(przecinek + spacja). str_to_struc rozdziela na podstaie spacji
+    replace(line.begin(), line.end(), ',', ' '); // Podmień ',' na ' '(spacja). str_to_struc rozdziela na podstaie spacji
     return str_to_struct(line);
 }
 
-Values get_args(int argc, char const *argv[]){
+Values get_args(int argc, char const *argv[]){ // Wczytaj argumenty
     Values values, continuation_values;
-    cout << argc << endl;
 
     for(int i=0; i<argc; i++){ // Sprawdzanie argumentów
         string arg = argv[i];
@@ -181,7 +181,6 @@ Values get_args(int argc, char const *argv[]){
             std::cerr << e.what() << '\n';
             cout << "Wprowadzono błędne argumenty\n";
         }
-        
     }
     
     if(continuation){
@@ -200,7 +199,7 @@ Values get_args(int argc, char const *argv[]){
 int main(int argc, char const *argv[])
 {
     Values values;
-    values = get_args(argc, argv);
+    values = get_args(argc, argv); // Wczytaj argumenty
     calculate(values); // Właściwe obliczenia
 
     return 0;
