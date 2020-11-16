@@ -108,9 +108,10 @@ void calculate(Values values){ // Właściwe obliczenia
 
 void draw_help(){
     cout << "\n----Help----\n";
-    cout << "usage: calc <Months> <Mies wplata> <Oprocen> <Kapita>\n";
+    cout << "usage: main <Miesiące> <Mies wplata> <Oprocen> <Kapita>\n";
     cout << "\n---Other args---\n";
-    cout << "-c - continue calculations from output_file.txt\n";
+    cout << "-c - kontynułuj kalkulacje z pliku" << "output.csv" << "\n";
+    cout << "Więcej info: https://github.com/Sekyzio/Savings_calc/blob/master/REDME.md\n";
     exit(0);
     return;
 }

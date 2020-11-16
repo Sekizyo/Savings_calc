@@ -5,19 +5,16 @@
 </p>
 
 <!-- TABLE OF CONTENTS -->
-## Table of Contents
+## Spis treści
 
-* [O projekcie](#o-projekcie)
-* [Getting Started](#getting-started)
-  * [Prerequisites](#prerequisites)
-  * [Installation](#installation)
-* [Usage](#usage)
-* [Roadmap](#roadmap)
-* [Contributing](#contributing)
-* [License](#license)
-* [Contact](#contact)
-* [Acknowledgements](#acknowledgements)
-
+* [O projekcie](#O-projekcie)
+* [Uruchamianie](#Uruchamianie)
+  * [Instalacja](#Instalacja)
+* [Używanie](#Używanie)
+  * [Przykłady](#Przykłady)
+  * [Opcje](#Opcje)
+* [Licencja](#Licencja)
+* [Kontakt](#Kontakt)
 
 
 <!-- ABOUT THE PROJECT -->
@@ -31,110 +28,58 @@ Zadanie: Należy napisać program konsolowy w C++, który sporządzi raport z sy
 <!-- GETTING STARTED -->
 ## Uruchamianie
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+### Instalacja
 
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
+1. Klonowanie repozytorium
 ```sh
-npm install npm@latest -g
+git clone https://github.com/Sekyzio/Savings_calc.git
 ```
 
-### Installation
+Następnie należy skompilować plik main.cpp używająć kompilatora c++.
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
 ```sh
-git clone https://github.com/your_username_/Project-Name.git
+gcc main.cpp
 ```
-3. Install NPM packages
+Lub:
 ```sh
-npm install
-```
-4. Enter your API in `config.js`
-```JS
-const API_KEY = 'ENTER YOUR API';
+g++ main.cpp
 ```
 
+## Używanie
+
+By użyć programu należy wprowadzić odpowiednie argumenty.
+* Miesiące oszczędzania
+* Miesięczna wpłata
+* Oprocentowanie w skali rocznej
+* Kapitalizacja
+
+```sh
+main.exe 12 500 2.5 1
+```
+
+Wynik obliczeń zapisze do pliku "output.csv".
 
 
-<!-- USAGE EXAMPLES -->
-## Usage
+### Przykłady
+Będzie kontynułować obliczenia z pliku "output.csv" z nowymi wartościami.
+```sh
+ main.exe 36 750 2.2 1 -c
+```
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-
-
-<!-- ROADMAP -->
-## Roadmap
-
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a list of proposed features (and known issues).
+### Opcje
+ ```
+/?, -help      Standardowa pomoc 
+-c             Kontynuacja poprzednich obliczeń z nowymi wartościami
+ ```
 
 
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-
-
-<!-- LICENSE -->
-## License
+## Licencja
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
+## Kontakt
 
+Email: mateuszpieczulis123@gmail.com 
 
-<!-- CONTACT -->
-## Contact
+Github: [https://github.com/Sekyzio](https://github.com/Sekyzio)
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
-
-
-
-<!-- ACKNOWLEDGEMENTS -->
-## Acknowledgements
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Img Shields](https://shields.io)
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Pages](https://pages.github.com)
-* [Animate.css](https://daneden.github.io/animate.css)
-* [Loaders.css](https://connoratherton.com/loaders)
-* [Slick Carousel](https://kenwheeler.github.io/slick)
-* [Smooth Scroll](https://github.com/cferdinandi/smooth-scroll)
-* [Sticky Kit](http://leafo.net/sticky-kit)
-* [JVectorMap](http://jvectormap.com)
-* [Font Awesome](https://fontawesome.com)
-
-
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=flat-square
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=flat-square
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=flat-square
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=flat-square
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=flat-square
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
