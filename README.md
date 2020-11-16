@@ -1,7 +1,5 @@
-
-<br />
 <p align="center">
-  <h3 align="center">Kalkulator na procent składny</h3>
+  <h3 align="center">Kalkulator na procent składany</h3>
 </p>
 
 
